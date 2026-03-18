@@ -9,6 +9,11 @@ jobs:
   renew:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    
+    # 【新增】赋予 GITHUB_TOKEN 删除 Action 运行记录的写权限
+    permissions:
+      actions: write
+      contents: read
 
     steps:
       - name: 检出代码
@@ -47,3 +52,13 @@ jobs:
           name: screenshots-${{ github.run_number }}
           path: artifacts/
           retention-days: 3
+
+      # 【新增】清理旧的 Workflow 运行记录，仅保留最近 3 次
+      - name: 清理旧的运行记录
+        if: always()
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0           # 设置为 0 天，意味着主要依赖下面的保留次数逻辑
+          keep_minimum_runs: 3     # 核心配置：始终保留最近 3 次运行记录
