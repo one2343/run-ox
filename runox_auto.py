@@ -219,29 +219,27 @@ class RunoxRenewal:
                 self.hw(3, 5)
                 self.shot(sb, "07_after_manage.png")
 
-               # ── 7.5. 处理续期/开机前的 Cloudflare Turnstile 验证 ──────
+              # ── 7.5. 处理续期/开机前的 Cloudflare Turnstile 验证 ──────
                 self.log("🔄 检测并处理操作前的 Cloudflare 验证...")
                 try:
-                    # 检查页面中是否加载了 turnstile 容器
-                    if sb.is_element_present(".turnstile-container", timeout=5):
-                        self.log("👀 发现 Turnstile 验证容器，尝试自动处理...")
-                        self.hw(3, 5) # 给它一点时间加载 iframe
-                        
-                        # 尝试调用 SB 的内建方法点击/处理验证
-                        sb.uc_gui_click_captcha() 
-                        self.hw(4, 7) # 等待验证通过（变成绿勾）
-                        self.log("✅ Turnstile 验证处理完成（或已自动通过）")
-                    else:
-                        self.log("⏭️ 未检测到 Turnstile 验证，跳过")
+                    # 使用 wait_for_element_present 等待元素出现，支持 timeout
+                    sb.wait_for_element_present(".turnstile-container", timeout=8)
+                    self.log("👀 发现 Turnstile 验证容器，尝试自动处理...")
+                    self.hw(3, 5) # 给它一点时间彻底加载 iframe
+                    
+                    # 调用 UC 模式的方法点击验证
+                    sb.uc_gui_click_captcha() 
+                    self.hw(4, 7) # 等待验证通过（变成绿勾）
+                    self.log("✅ Turnstile 验证点击指令已发送")
                 except Exception as e:
-                    self.log(f"⚠️ Turnstile 处理跳过: {e}")
+                    # 如果 8 秒内没找到容器，说明当前不需要验证，正常跳过
+                    self.log(f"⏭️ 未检测到 Turnstile 验证或已跳过: {e}")
 
                 self.shot(sb, "07_5_after_cf_check.png")
 
                 # ── 8. 点击 Start / Restore 续期 ─────────────────────────
                 self.log("🔍 寻找 Start / Restore 按钮...")
                 
-                # 提示：因为 CF 验证通过后按钮可能需要一点时间解除 disabled 状态，稍微增加一点 timeout
                 restore_ok = self.try_click(sb, [
                     "//button[contains(text(),'Start / Restore')]",
                     "//button[contains(text(),'Restore')]",
