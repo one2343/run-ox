@@ -223,7 +223,7 @@ class RunoxRenewal:
                 self.log("🔄 检测并处理操作前的 Cloudflare 验证...")
                 try:
                     # 使用 wait_for_element_present 等待元素出现，支持 timeout
-                    sb.wait_for_element_present(".turnstile-container", timeout=30)
+                    sb.wait_for_element_present(".turnstile-container", timeout=45)
                     self.log("👀 发现 Turnstile 验证容器，尝试自动处理...")
                     self.hw(3, 5) # 给它一点时间彻底加载 iframe
                     
